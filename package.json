@@ -1,0 +1,14 @@
+{
+  "name": "disparo-wking",
+  "version": "1.0.0",
+  "description": "Disparo automatizado de mensagens via WhatsApp com vídeo e texto personalizado",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "@wppconnect-team/wppconnect": "^1.9.6",
+    "csv-parser": "^3.0.0"
+  }
+}
