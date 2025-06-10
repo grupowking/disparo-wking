@@ -1,0 +1,66 @@
+2025/06/09-07:53:38.399 23e4 Reusing MANIFEST C:\Users\Via\disparo-wking\tokens\WKing\Default\Local Storage\leveldb/MANIFEST-000001
+2025/06/09-07:53:38.411 23e4 Recovering log #13
+2025/06/09-07:53:38.419 23e4 Reusing old log C:\Users\Via\disparo-wking\tokens\WKing\Default\Local Storage\leveldb/000013.log 
+2025/06/09-08:47:44.250 23e4 Level-0 table #17: started
+2025/06/09-08:47:46.617 23e4 Level-0 table #17: 12939 bytes OK
+2025/06/09-08:47:46.797 23e4 Delete type=0 #13
+2025/06/09-08:47:46.798 23e4 Compacting 4@0 + 1@1 files
+2025/06/09-08:47:46.941 23e4 Generated table #18@0: 106 keys, 8731 bytes
+2025/06/09-08:47:46.941 23e4 Compacted 4@0 + 1@1 files => 8731 bytes
+2025/06/09-08:47:46.947 23e4 compacted to: files[ 0 1 1 0 0 0 0 ]
+2025/06/09-08:47:46.951 23e4 Delete type=2 #8
+2025/06/09-08:47:46.955 23e4 Delete type=2 #10
+2025/06/09-08:47:46.957 23e4 Delete type=2 #12
+2025/06/09-08:47:46.958 23e4 Delete type=2 #14
+2025/06/09-08:47:46.958 23e4 Delete type=2 #17
+2025/06/09-10:13:38.999 23e4 Level-0 table #20: started
+2025/06/09-10:13:39.012 23e4 Level-0 table #20: 12910 bytes OK
+2025/06/09-10:13:39.018 23e4 Delete type=0 #16
+2025/06/09-11:24:39.026 23e4 Level-0 table #22: started
+2025/06/09-11:24:39.042 23e4 Level-0 table #22: 12799 bytes OK
+2025/06/09-11:24:39.045 23e4 Delete type=0 #19
+2025/06/09-12:33:38.995 23e4 Level-0 table #24: started
+2025/06/09-12:33:39.007 23e4 Level-0 table #24: 12776 bytes OK
+2025/06/09-12:33:39.012 23e4 Delete type=0 #21
+2025/06/09-13:36:39.004 1a48 Level-0 table #26: started
+2025/06/09-13:36:39.018 1a48 Level-0 table #26: 13517 bytes OK
+2025/06/09-13:36:39.022 1a48 Delete type=0 #23
+2025/06/09-13:36:39.025 1a48 Compacting 4@0 + 1@1 files
+2025/06/09-13:36:39.033 1a48 Generated table #27@0: 110 keys, 8848 bytes
+2025/06/09-13:36:39.034 1a48 Compacted 4@0 + 1@1 files => 8848 bytes
+2025/06/09-13:36:39.035 1a48 compacted to: files[ 0 1 1 0 0 0 0 ]
+2025/06/09-13:36:39.038 1a48 Delete type=2 #18
+2025/06/09-13:36:39.039 1a48 Delete type=2 #20
+2025/06/09-13:36:39.040 1a48 Delete type=2 #22
+2025/06/09-13:36:39.040 1a48 Delete type=2 #24
+2025/06/09-13:36:39.040 1a48 Delete type=2 #26
+2025/06/09-14:43:39.005 1a48 Level-0 table #29: started
+2025/06/09-14:43:39.021 1a48 Level-0 table #29: 14375 bytes OK
+2025/06/09-14:43:39.025 1a48 Delete type=0 #25
+2025/06/09-16:07:38.992 1a48 Level-0 table #31: started
+2025/06/09-16:07:39.003 1a48 Level-0 table #31: 12371 bytes OK
+2025/06/09-16:07:39.007 1a48 Delete type=0 #28
+2025/06/09-17:17:39.074 1a48 Level-0 table #33: started
+2025/06/09-17:17:39.083 1a48 Level-0 table #33: 13094 bytes OK
+2025/06/09-17:17:39.086 1a48 Delete type=0 #30
+2025/06/09-18:22:39.160 23e4 Level-0 table #35: started
+2025/06/09-18:22:39.188 23e4 Level-0 table #35: 13450 bytes OK
+2025/06/09-18:22:39.192 23e4 Delete type=0 #32
+2025/06/09-18:22:39.193 23e4 Compacting 4@0 + 1@1 files
+2025/06/09-18:22:39.203 23e4 Generated table #36@0: 111 keys, 7969 bytes
+2025/06/09-18:22:39.204 23e4 Compacted 4@0 + 1@1 files => 7969 bytes
+2025/06/09-18:22:39.205 23e4 compacted to: files[ 0 1 1 0 0 0 0 ]
+2025/06/09-18:22:39.206 23e4 Delete type=2 #27
+2025/06/09-18:22:39.207 23e4 Delete type=2 #29
+2025/06/09-18:22:39.208 23e4 Delete type=2 #31
+2025/06/09-18:22:39.208 23e4 Delete type=2 #33
+2025/06/09-18:22:39.208 23e4 Delete type=2 #35
+2025/06/09-19:25:39.197 23e4 Level-0 table #38: started
+2025/06/09-19:25:39.208 23e4 Level-0 table #38: 13473 bytes OK
+2025/06/09-19:25:39.212 23e4 Delete type=0 #34
+2025/06/09-20:30:39.200 1a48 Level-0 table #40: started
+2025/06/09-20:30:39.453 1a48 Level-0 table #40: 13439 bytes OK
+2025/06/09-20:30:39.459 1a48 Delete type=0 #37
+2025/06/09-21:48:39.205 23e4 Level-0 table #42: started
+2025/06/09-21:48:39.220 23e4 Level-0 table #42: 12716 bytes OK
+2025/06/09-21:48:39.224 23e4 Delete type=0 #39
