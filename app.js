@@ -17,12 +17,12 @@ const contatos = [];
 fs.createReadStream('contatos.csv')
   .pipe(csv({ separator: ';' }))
   .on('data', (row) => {
-    if (row.numero && row.nome) {
-      contatos.push({
-        telefone: `${row.numero.trim()}@c.us`,
-        primeiro_nome: row.nome.trim().split(' ')[0],
-      });
-    }
+    if (!row.nome || !row.numero) return;
+    contatos.push({
+      telefone: `${row.numero.trim()}@c.us`,
+      nome: row.nome.trim(),
+      primeiro_nome: row.nome.trim().split(' ')[0],
+    });
   })
   .on('end', () => {
     console.log('✅ Contatos carregados. Iniciando disparo...');
