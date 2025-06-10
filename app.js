@@ -34,9 +34,26 @@ function intervaloAleatorio() {
 }
 
 async function iniciarDisparo() {
+  // Configurações do Puppeteer para Railway/Docker
+  const puppeteerConfig = {
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-accelerated-2d-canvas',
+      '--no-first-run',
+      '--no-zygote',
+      '--single-process',
+      '--disable-gpu',
+      '--disable-web-security',
+      '--disable-features=VizDisplayCompositor'
+    ]
+  };
+
   await wppconnect.create({
     session: 'WKing',
-    headless: false,
+    headless: true, // Mudei para true para produção
+    puppeteerOptions: puppeteerConfig, // Adicionei as configurações do Puppeteer
   }).then(async (client) => {
     for (let i = 0; i < contatos.length; i++) {
       const contato = contatos[i];
@@ -70,6 +87,8 @@ async function iniciarDisparo() {
       }
     }
     console.log('🎯 Disparo finalizado!');
+  }).catch((erro) => {
+    console.error('❌ Erro ao inicializar WPPConnect:', erro);
   });
 }
 
