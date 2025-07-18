@@ -51,7 +51,7 @@ async function iniciarDisparo() {
 
   await wppconnect.create({
     session: 'VBConcept',
-    headless: true,
+    headless: false,
     qrTimeout: 0,
     autoClose: 0,
     puppeteerOptions: puppeteerConfig,
