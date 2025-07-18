@@ -1,0 +1,15 @@
+2025/07/18-17:54:43.052 4f0 Reusing MANIFEST C:\Users\Via\Documents\GitHub\disparo-wking\tokens\VBConcept\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
+2025/07/18-17:54:43.052 4f0 Recovering log #137
+2025/07/18-17:54:43.119 4f0 Reusing old log C:\Users\Via\Documents\GitHub\disparo-wking\tokens\VBConcept\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/000137.log 
+2025/07/18-17:54:43.120 4f0 Delete type=2 #136
+2025/07/18-17:54:43.120 4f0 Delete type=2 #138
+2025/07/18-17:54:44.114 2a1c Level-0 table #142: started
+2025/07/18-17:54:44.166 2a1c Level-0 table #142: 673072 bytes OK
+2025/07/18-17:54:44.169 2a1c Delete type=0 #137
+2025/07/18-17:54:44.170 1a84 Manual compaction at level-0 from '\x00:\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00;\x00\x00\x00' @ 0 : 0; will stop at (end)
+2025/07/18-17:54:46.884 4f0 Compacting 1@1 + 1@2 files
+2025/07/18-17:54:47.057 4f0 Generated table #143@1: 21968 keys, 916527 bytes
+2025/07/18-17:54:47.058 4f0 Compacted 1@1 + 1@2 files => 916527 bytes
+2025/07/18-17:54:47.061 4f0 compacted to: files[ 0 0 1 0 0 0 0 ]
+2025/07/18-17:54:47.062 4f0 Delete type=2 #139
+2025/07/18-17:54:47.062 4f0 Delete type=2 #142

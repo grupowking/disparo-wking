@@ -14,12 +14,17 @@ Quer saber o que é? Responde aqui com “quero meu presente” que eu te explic
 
 const contatos = [];
 
+// Leitura do CSV
 fs.createReadStream('contatos.csv')
   .pipe(csv({ separator: ';' }))
   .on('data', (row) => {
     if (!row.nome || !row.numero) return;
+
+    const numeroLimpo = row.numero.replace(/\D/g, '');
+    if (numeroLimpo.length < 10) return;
+
     contatos.push({
-      telefone: `${row.numero.trim()}@c.us`,
+      telefone: `${numeroLimpo}@c.us`,
       nome: row.nome.trim(),
       primeiro_nome: row.nome.trim().split(' ')[0],
     });
@@ -35,6 +40,7 @@ function intervaloAleatorio() {
 
 async function iniciarDisparo() {
   const puppeteerConfig = {
+    headless: false,
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
@@ -42,104 +48,45 @@ async function iniciarDisparo() {
       '--disable-accelerated-2d-canvas',
       '--no-first-run',
       '--no-zygote',
-      '--single-process',
       '--disable-gpu',
-      '--disable-web-security',
-      '--disable-features=VizDisplayCompositor'
-    ]
+    ],
   };
 
-  await wppconnect.create({
-    session: 'VBConcept',
-    headless: true,
-    qrTimeout: 0,
-    autoClose: 0,
-    puppeteerOptions: puppeteerConfig,
-  }).then(async (client) => {
+  await wppconnect
+    .create({
+      session: 'VBConcept',
+      headless: false,
+      useChrome: true,
+      autoClose: false,
+      puppeteerOptions: puppeteerConfig,
+    })
+    .then(async (client) => {
+      // Resposta automática
+      client.onMessage(async (message) => {
+        if (!message.from || !message.body) return;
 
-    // Listener para mensagens recebidas
-    client.onMessage(async (message) => {
-      if (!message.from || !message.body) return;
+        const texto = message.body.toLowerCase().trim();
+        const textoNormalizado = texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
-      const texto = message.body.toLowerCase().trim();
-      const textoNormalizado = texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-
-      const variacoes = [
-        'quero meu presente',
-        'quero o presente',
-        'quero presente',
-        'meu presente',
-        'cadê meu presente',
-        'cadê o presente',
-        'cade meu presente',
-        'cade o presente'
-      ];
-
-      if (variacoes.some(v => textoNormalizado.includes(v))) {
-        try {
-          await client.sendText(message.from, `🎉 Presente liberado!
-
-Você acabou de desbloquear 15% OFF pra usar nas lojas Via Búzios até 31/07.
-
-É só mostrar esse cupom no caixa, combinado? 🧡`);
-
-          await client.sendFile(
-            message.from,
-            './cupom.mp4', // ✅ Caminho relativo
-            'cupom.mp4',
-            'Cupom de 15% OFF - válido até 31/07'
-          );
-
-          console.log(`🎁 Cupom em vídeo enviado para ${message.from}`);
-        } catch (erro) {
-          console.error(`❌ Erro ao enviar cupom para ${message.from}:`, erro.message);
+        if (textoNormalizado.includes("quero meu presente")) {
+          await client.sendText(message.from, "🥳 Oba! Vou te mandar o cupom exclusivo agora mesmo! Aguenta aí...");
+          await client.sendFile(message.from, './cupom.mp4', 'cupom.mp4', '🎁 Aproveite essa surpresa da Via Búzios com carinho!');
         }
+      });
+
+      // Disparo inicial
+      for (const contato of contatos) {
+        try {
+          const mensagem = MENSAGEM_TEXTO.replace('{primeiro_nome}', contato.primeiro_nome);
+          await client.sendText(contato.telefone, mensagem);
+          console.log(`✅ Mensagem enviada para ${contato.nome}`);
+        } catch (error) {
+          console.error(`❌ Erro ao enviar para ${contato.nome}:`, error.message);
+        }
+
+        const delay = intervaloAleatorio();
+        console.log(`⏳ Aguardando ${delay / 1000}s para o próximo...`);
+        await new Promise((resolve) => setTimeout(resolve, delay));
       }
     });
-
-    // Início do disparo
-    for (let i = 0; i < contatos.length; i++) {
-      const contato = contatos[i];
-      if (!dentroDoHorarioPermitido()) {
-        console.log("⏳ Fora do horário permitido. Aguardando 5min...");
-        await new Promise(resolve => setTimeout(resolve, 5 * 60 * 1000));
-        i--;
-        continue;
-      }
-
-      try {
-        console.log(`📤 Enviando para ${contato.primeiro_nome}...`);
-        const mensagemPersonalizada = MENSAGEM_TEXTO.replace('{primeiro_nome}', contato.primeiro_nome);
-        await client.sendText(contato.telefone, mensagemPersonalizada);
-
-        const espera = intervaloAleatorio();
-        console.log(`✅ Mensagem enviada para ${contato.primeiro_nome}. Aguardando ${espera / 1000}s...`);
-        await new Promise(resolve => setTimeout(resolve, espera));
-
-        if (i % 200 === 0 && i !== 0) await new Promise(resolve => setTimeout(resolve, 60 * 1000));
-        if (i % 500 === 0 && i !== 0) await new Promise(resolve => setTimeout(resolve, 3 * 60 * 1000));
-        if (i % 1000 === 0 && i !== 0) await new Promise(resolve => setTimeout(resolve, 6 * 60 * 1000));
-        if (i % 1500 === 0 && i !== 0) await new Promise(resolve => setTimeout(resolve, 10 * 60 * 1000));
-
-      } catch (erro) {
-        console.error(`❌ Erro com ${contato.primeiro_nome}:`, erro.message);
-      }
-    }
-
-    console.log('🎯 Disparo finalizado!');
-  }).catch((erro) => {
-    console.error('❌ Erro ao inicializar WPPConnect:', erro);
-  });
-}
-
-function dentroDoHorarioPermitido() {
-  const agora = new Date();
-  const hora = agora.getHours();
-  const dia = agora.getDay();
-
-  if (dia === 0) {
-    return hora >= 9 && hora < 14; // Domingo
-  } else {
-    return hora >= 8 && hora < 21; // Segunda a sábado
-  }
 }
