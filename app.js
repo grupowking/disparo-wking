@@ -3,10 +3,8 @@ const fs = require('fs');
 const csv = require('csv-parser');
 
 // Configurações
-const INTERVALO_MIN = 75000; // 75 segundos
-const INTERVALO_MAX = 90000; // 90 segundos
-const DDD_PADRAO = '22'; // Altere aqui se quiser outro DDD
-
+const INTERVALO_MIN = 75000;
+const INTERVALO_MAX = 90000;
 const MENSAGEM_TEXTO = `🎁 {primeiro_nome}, tem uma surpresa especial esperando por você aqui na Via Búzios 😍
 
 A gente preparou isso com muito carinho pra nossa clientela fiel… e claro que você não podia ficar de fora!
@@ -21,12 +19,7 @@ fs.createReadStream('contatos.csv')
   .on('data', (row) => {
     if (!row.nome || !row.numero) return;
 
-    let numeroLimpo = row.numero.replace(/\D/g, '');
-    if (numeroLimpo.length === 8 || numeroLimpo.length === 9) {
-      // Se estiver sem DDD, adiciona o DDD padrão
-      numeroLimpo = DDD_PADRAO + numeroLimpo;
-    }
-
+    const numeroLimpo = row.numero.replace(/\D/g, '');
     if (numeroLimpo.length < 10) return;
 
     contatos.push({
@@ -61,9 +54,9 @@ async function iniciarDisparo() {
   await wppconnect
     .create({
       session: 'VBConcept',
-      headless: false,
-      useChrome: true,
-      autoClose: false,
+      tokenStore: 'file',
+      headless: true,
+      autoClose: 0,
       puppeteerOptions: puppeteerConfig,
     })
     .then(async (client) => {
@@ -88,11 +81,19 @@ async function iniciarDisparo() {
           console.log(`✅ Mensagem enviada para ${contato.nome}`);
         } catch (error) {
           console.error(`❌ Erro ao enviar para ${contato.nome}:`, error.message);
+
+          if (error.message.includes('WPP is not defined')) {
+            console.log('⚠️ WhatsApp ainda não está pronto. Aguardando 60s antes de tentar o próximo...');
+            await new Promise((resolve) => setTimeout(resolve, 60000));
+          }
         }
 
         const delay = intervaloAleatorio();
         console.log(`⏳ Aguardando ${delay / 1000}s para o próximo...`);
         await new Promise((resolve) => setTimeout(resolve, delay));
       }
+    })
+    .catch((error) => {
+      console.error('❌ Erro ao iniciar o client:', error.message);
     });
 }
