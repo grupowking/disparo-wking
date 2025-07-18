@@ -3,7 +3,7 @@ const fs = require('fs');
 const csv = require('csv-parser');
 
 // Configurações
-const INTERVALO_MIN = 75000; // 55 segundos
+const INTERVALO_MIN = 75000; // 75 segundos
 const INTERVALO_MAX = 90000; // 90 segundos
 
 const MENSAGEM_TEXTO = `🎁 {primeiro_nome}, tem uma surpresa especial esperando por você aqui na Via Búzios 😍
@@ -51,7 +51,7 @@ async function iniciarDisparo() {
 
   await wppconnect.create({
     session: 'VBConcept',
-    headless: false,
+    headless: true,
     qrTimeout: 0,
     autoClose: 0,
     puppeteerOptions: puppeteerConfig,
@@ -85,7 +85,7 @@ Você acabou de desbloquear 15% OFF pra usar nas lojas Via Búzios até 31/07.
 
           await client.sendFile(
             message.from,
-            'C:\\Users\\Via\\Documents\\GitHub\\disparo-wking\\cupom.mp4',
+            './cupom.mp4', // ✅ Caminho relativo
             'cupom.mp4',
             'Cupom de 15% OFF - válido até 31/07'
           );
