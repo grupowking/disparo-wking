@@ -3,14 +3,14 @@ const fs = require('fs');
 const csv = require('csv-parser');
 
 // Configurações
-const INTERVALO_MIN = 16000; // 16 segundos
-const INTERVALO_MAX = 23000; // 23 segundos
-const CAMINHO_VIDEO = './namorados2025.mp4';
-const MENSAGEM_TEXTO = `🎁 {primeiro_nome}, o presente que vai surpreender quem você ama está na Via Búzios!
-Tem opções incríveis pra ele, pra ela, pra celebrar juntos — com bom gosto e muito carinho.
+const INTERVALO_MIN = 75000; // 55 segundos
+const INTERVALO_MAX = 90000; // 90 segundos
 
-👀 Mas corre, porque os mais desejados estão saindo rápido…
-📍Estamos pertinho do Supermarket. E se preferir, levamos até você!`;
+const MENSAGEM_TEXTO = `🎁 {primeiro_nome}, tem uma surpresa especial esperando por você aqui na Via Búzios 😍
+
+A gente preparou isso com muito carinho pra nossa clientela fiel… e claro que você não podia ficar de fora!
+
+Quer saber o que é? Responde aqui com “quero meu presente” que eu te explico 👀`;
 
 const contatos = [];
 
@@ -34,7 +34,6 @@ function intervaloAleatorio() {
 }
 
 async function iniciarDisparo() {
-  // Configurações do Puppeteer para Railway/Docker
   const puppeteerConfig = {
     args: [
       '--no-sandbox',
@@ -51,31 +50,71 @@ async function iniciarDisparo() {
   };
 
   await wppconnect.create({
-    session: 'WKing',
-    headless: true, // Mudei para true para produção
-    puppeteerOptions: puppeteerConfig, // Adicionei as configurações do Puppeteer
+    session: 'VBConcept',
+    headless: true,
+    qrTimeout: 0,
+    autoClose: 0,
+    puppeteerOptions: puppeteerConfig,
   }).then(async (client) => {
+
+    // Listener para mensagens recebidas
+    client.onMessage(async (message) => {
+      if (!message.from || !message.body) return;
+
+      const texto = message.body.toLowerCase().trim();
+      const textoNormalizado = texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+      const variacoes = [
+        'quero meu presente',
+        'quero o presente',
+        'quero presente',
+        'meu presente',
+        'cadê meu presente',
+        'cadê o presente',
+        'cade meu presente',
+        'cade o presente'
+      ];
+
+      if (variacoes.some(v => textoNormalizado.includes(v))) {
+        try {
+          await client.sendText(message.from, `🎉 Presente liberado!
+
+Você acabou de desbloquear 15% OFF pra usar nas lojas Via Búzios até 31/07.
+
+É só mostrar esse cupom no caixa, combinado? 🧡`);
+
+          await client.sendFile(
+            message.from,
+            'C:\\Users\\Via\\Documents\\GitHub\\disparo-wking\\cupom.mp4',
+            'cupom.mp4',
+            'Cupom de 15% OFF - válido até 31/07'
+          );
+
+          console.log(`🎁 Cupom em vídeo enviado para ${message.from}`);
+        } catch (erro) {
+          console.error(`❌ Erro ao enviar cupom para ${message.from}:`, erro.message);
+        }
+      }
+    });
+
+    // Início do disparo
     for (let i = 0; i < contatos.length; i++) {
       const contato = contatos[i];
       if (!dentroDoHorarioPermitido()) {
         console.log("⏳ Fora do horário permitido. Aguardando 5min...");
         await new Promise(resolve => setTimeout(resolve, 5 * 60 * 1000));
-        i--; // tenta o mesmo contato novamente depois
+        i--;
         continue;
       }
 
       try {
         console.log(`📤 Enviando para ${contato.primeiro_nome}...`);
-        await client.sendFile(contato.telefone, CAMINHO_VIDEO, 'namorados2025.mp4', '');
-        await new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * 2000) + 8000));
-
         const mensagemPersonalizada = MENSAGEM_TEXTO.replace('{primeiro_nome}', contato.primeiro_nome);
         await client.sendText(contato.telefone, mensagemPersonalizada);
 
         const espera = intervaloAleatorio();
-        console.log(`✅ Mensagens enviadas para ${contato.primeiro_nome}. Aguardando ${espera / 1000}s...`);
+        console.log(`✅ Mensagem enviada para ${contato.primeiro_nome}. Aguardando ${espera / 1000}s...`);
         await new Promise(resolve => setTimeout(resolve, espera));
-
 
         if (i % 200 === 0 && i !== 0) await new Promise(resolve => setTimeout(resolve, 60 * 1000));
         if (i % 500 === 0 && i !== 0) await new Promise(resolve => setTimeout(resolve, 3 * 60 * 1000));
@@ -86,6 +125,7 @@ async function iniciarDisparo() {
         console.error(`❌ Erro com ${contato.primeiro_nome}:`, erro.message);
       }
     }
+
     console.log('🎯 Disparo finalizado!');
   }).catch((erro) => {
     console.error('❌ Erro ao inicializar WPPConnect:', erro);
@@ -98,7 +138,7 @@ function dentroDoHorarioPermitido() {
   const dia = agora.getDay();
 
   if (dia === 0) {
-    return hora >= 13 && hora < 17; // Domingo
+    return hora >= 9 && hora < 14; // Domingo
   } else {
     return hora >= 8 && hora < 21; // Segunda a sábado
   }
