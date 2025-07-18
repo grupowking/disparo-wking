@@ -5,6 +5,7 @@ const csv = require('csv-parser');
 // Configurações
 const INTERVALO_MIN = 75000; // 75 segundos
 const INTERVALO_MAX = 90000; // 90 segundos
+const DDD_PADRAO = '22'; // Altere aqui se quiser outro DDD
 
 const MENSAGEM_TEXTO = `🎁 {primeiro_nome}, tem uma surpresa especial esperando por você aqui na Via Búzios 😍
 
@@ -20,11 +21,16 @@ fs.createReadStream('contatos.csv')
   .on('data', (row) => {
     if (!row.nome || !row.numero) return;
 
-    const numeroLimpo = row.numero.replace(/\D/g, '');
+    let numeroLimpo = row.numero.replace(/\D/g, '');
+    if (numeroLimpo.length === 8 || numeroLimpo.length === 9) {
+      // Se estiver sem DDD, adiciona o DDD padrão
+      numeroLimpo = DDD_PADRAO + numeroLimpo;
+    }
+
     if (numeroLimpo.length < 10) return;
 
     contatos.push({
-      telefone: `${numeroLimpo}@c.us`,
+      telefone: `55${numeroLimpo}@c.us`,
       nome: row.nome.trim(),
       primeiro_nome: row.nome.trim().split(' ')[0],
     });
