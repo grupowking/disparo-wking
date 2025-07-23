@@ -18,81 +18,97 @@ const VIDEO_DELAY_MAX    = 20_000;
 const SESSAO       = 'VBConcept';
 const VIDEO_PATH   = './cupom.mp4';
 
-// ... (Templates e Respostas OK permanecem os mesmos)
-const TEMPLATES_INICIAIS = [ `🎁 {primeiro}, adivinha? Liberamos um lote de 50 cupons com uma surpresa especial pra você aqui na Via Búzios 😍\n\nPreparada pros nossos clientes fiéis! Responde “quero meu presente” pra garantir o seu antes que acabe! 👀`, `🎉 Hey {primeiro}! Pintou um mimo exclusivo pra quem é VIP na Via Búzios, mas corre que é limitado! 🧡\n\nQuer descobrir o que é? Manda “quero meu presente” pra reservar o seu! 😉`, `🙌 {primeiro}! Surpresa chegando… Liberamos um lote único de 50 cupons só pra quem é da casa 😍\n\nDigita “quero meu presente” pra eu liberar o seu!`, `🥳 {primeiro}, preparamos algo que é a sua cara, mas são só 50 unidades!\n\nPra saber e garantir o seu, me responde “quero meu presente” e pronto 👀`, `👋 Oi, {primeiro}! Passando pra avisar que separamos um presente pra você, mas seja rápido(a), são só para os 50 primeiros! ✨\n\nCurioso(a)? Manda um “quero meu presente” aqui!`, `✨ {primeiro}, seu dia vai ficar melhor! Temos um benefício exclusivo te esperando na Via Búzios, mas o lote é limitado.\n\nÉ só responder “quero meu presente” que eu guardo um pra você!`, `Ei, {primeiro}! 🤫 Temos um segredinho que vale um presente... mas são apenas 50 cupons!\n\nSe quiser garantir o seu, já sabe, né? “quero meu presente” 👇`, `🧡 {primeiro}, seu nome foi selecionado para algo especial que preparamos na Via Búzios! Corra, pois a oferta é limitada aos 50 primeiros.\n\nNão fica de fora! Me manda “quero meu presente” pra desbloquear.`, `Sabe quem lembrou de você hoje, {primeiro}? A gente! E com um presente limitado. 🎁\n\nPra receber, é fácil: responde “quero meu presente” antes que esgote.`, `Olá {primeiro}! Que tal uma surpresa pra alegrar sua semana? A Via Búzios preparou uma, mas são só 50 cupons! 💖\n\nBasta responder “quero meu presente” pra descobrir e garantir o seu!` ];
-const TEMPLATES_RESPOSTA = [ `Ufa, na hora! Você garantiu o cupom de número {contador} de 50! 🥳\n\nVocê desbloqueou 15% OFF pra usar nas lojas Via Búzios até 15/08. Corre pra usar antes que os outros resgatem tudo!\n\nÉ só mostrar esse cupom no caixa, combinado? 🧡`, `Show, {primeiro}! Você é o cliente Nº {contador} a garantir o seu. Restam poucos! Aqui está sua surpresa: 15% DE DESCONTO 🥳\n\nVálido em qualquer loja Via Búzios até 15/08. Apresente este cupom e aproveite!`, `Conseguimos! ✨ Seu cupom é o de número {contador} e foi ativado. Se eu fosse você, já corria pra loja!\n\nUse e abuse nas lojas Via Búzios até o dia 15/08. Boas compras!`, `Missão cumprida, {primeiro}! 🎁 Você garantiu o cupom de número {contador}. Agora é correr!\n\nEle é válido até 15/08 em todas as nossas lojas. É só mostrar no caixa!` ];
-const RESPOSTAS_OK = [ 'quero meu presente', 'quero o presente', 'quero a surpresa', 'quero minha surpresa', 'quero surpresa', 'meu presente', 'cade meu presente', 'kd meu presente', 'me da o presente', 'manda o presente', 'manda a surpresa' ];
+const TEMPLATES_INICIAIS = [/* ... */];
+const TEMPLATES_RESPOSTA = [/* ... */];
+const RESPOSTAS_OK = [/* ... */];
 
 // --------------------------------------------------------------------
-// UTILITÁRIOS E LEITURA DO CSV (Sem alterações)
+// UTILITÁRIOS E LEITURA DO CSV
 // --------------------------------------------------------------------
 const rnd = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 const delay = (ms) => new Promise(r => setTimeout(r, ms));
-function dentroDoHorario() { const d = new Date(); const dia = d.getDay(); const h = d.getHours(); if (dia === 0) return h >= 9 && h < 14; if (dia >= 1 && dia <= 6) return h >= 9 && h < 20; return false; }
+function dentroDoHorario() {
+  const d = new Date(); const dia = d.getDay(); const h = d.getHours();
+  if (dia === 0) return h >= 9 && h < 14;
+  if (dia >= 1 && dia <= 6) return h >= 9 && h < 20;
+  return false;
+}
 const contatos = [];
-fs.createReadStream('contatos.csv').pipe(csv({ separator: ';', mapHeaders: ({ header }) => header.trim() })).on('data', (row) => { const nomeRaw = row['nome'] || ''; const numeroRaw = row['numero'] || ''; if (!nomeRaw || !numeroRaw) return; const nomeLimpo = nomeRaw.trim(); const numLimpo = numeroRaw.toString().replace(/\D/g, ''); if (numLimpo.length < 10) return; contatos.push({ telefone : `55${numLimpo}@c.us`, nomeCompleto : nomeLimpo, primeiroNome : nomeLimpo.split(' ')[0], }); }).on('end', () => { console.log(`✅ CSV lido. ${contatos.length} contatos válidos.`); iniciar(); });
+fs.createReadStream('contatos.csv')
+  .pipe(csv({ separator: ';', mapHeaders: ({ header }) => header.trim() }))
+  .on('data', (row) => {
+    const nomeRaw = row['nome'] || ''; const numeroRaw = row['numero'] || '';
+    if (!nomeRaw || !numeroRaw) return;
+    const nomeLimpo = nomeRaw.trim();
+    const numLimpo = numeroRaw.toString().replace(/\D/g, '');
+    if (numLimpo.length < 10) return;
+    contatos.push({
+      telefone     : `55${numLimpo}@c.us`,
+      nomeCompleto : nomeLimpo,
+      primeiroNome : nomeLimpo.split(' ')[0],
+    });
+  })
+  .on('end', () => {
+    console.log(`✅ CSV lido. ${contatos.length} contatos válidos.`);
+    iniciar();
+  });
 
 // ======================= SISTEMA DE FILA COM RETENTATIVA PERSISTENTE =======================
 const messageQueue = [];
 let queueIsRunning = false;
 
 async function startQueueProcessor(client) {
-    if (queueIsRunning) return;
-    queueIsRunning = true;
-    console.log('[FILA] Iniciando o processador de fila...');
+  if (queueIsRunning) return;
+  queueIsRunning = true;
+  console.log('[FILA] Iniciando o processador de fila...');
 
-    while (messageQueue.length > 0) {
-        const job = messageQueue.shift();
+  while (messageQueue.length > 0) {
+    const job = messageQueue.shift();
+    try {
+      if (!dentroDoHorario() && job.isMassMessage) {
+        console.log(`[FILA] ⏰ Fora do horário. Reenfileirando...`);
+        messageQueue.push(job);
+        await delay(600_000);
+        continue;
+      }
+      if (job.retryCount > 0) {
+        console.log(`
+[FILA] Segunda tentativa para ${job.logInfo}. Verificando número...`);
+        await client.checkNumberStatus(job.to);
+        await delay(5000);
+      }
+      console.log(`
+[FILA] Processando job: ${job.logInfo}`);
+      await client.startTyping(job.to);
+      await delay(job.humanDelay);
 
-        try {
-            if (!dentroDoHorario() && job.isMassMessage) {
-                console.log(`[FILA] ⏰ Fora do horário para disparo em massa. Devolvendo job para o fim da fila.`);
-                messageQueue.push(job);
-                await delay(600_000);
-                continue;
-            }
-
-            // Se for uma retentativa, força a verificação do número ANTES de tentar enviar.
-            if (job.retryCount > 0) {
-                console.log(`\n[FILA] Segunda tentativa para ${job.logInfo}. Verificando número...`);
-                await client.checkNumberStatus(job.to);
-                await delay(5000); // Pequena pausa após a verificação
-            }
-
-            console.log(`\n[FILA] Processando job do tipo "${job.type}" para ${job.logInfo}...`);
-            await client.startTyping(job.to);
-            await delay(job.humanDelay);
-
-            if (job.type === 'text') {
-                await client.sendText(job.to, job.content);
-            } else if (job.type === 'file') {
-                await client.sendFile(job.to, job.path, job.filename, job.caption);
-            }
-            
-            console.log(`[FILA] ✅ Job para ${job.logInfo} concluído com sucesso.`);
-
-        } catch (e) {
-            console.error(`[FILA] ❌ Job para ${job.logInfo} falhou: ${e.message}`);
-            
-            // LÓGICA DE RETENTATIVA PERSISTENTE
-            if (e.message && e.message.includes('Chat not found') && !job.retryCount) {
-                console.log(`[FILA] 🟡 Falha "Chat not found". Devolvendo para o FIM da fila para retentativa posterior.`);
-                job.retryCount = 1; // Marca que este job já falhou uma vez.
-                messageQueue.push(job); // Adiciona de volta no FIM da fila.
-            } else {
-                console.log(`[FILA] ❌ Falha definitiva para ${job.logInfo}. Job descartado.`);
-            }
-        } finally {
-            try { await client.stopTyping(job.to); } catch (e) {}
-            await delay(1000); // Pausa de 1s entre cada job para garantir estabilidade
-        }
+      if (job.type === 'text') {
+        await client.sendText(job.to, job.content);
+      } else if (job.type === 'file') {
+        await client.sendFile(job.to, job.path, job.filename, job.caption);
+      }
+      console.log(`[FILA] ✅ Enviado com sucesso: ${job.logInfo}`);
+    } catch (e) {
+      console.error(`[FILA] ❌ Falha: ${e.message}`);
+      if (e.message.includes('Chat not found') && !job.retryCount) {
+        console.log(`[FILA] 🟡 Chat não encontrado. Reenfileirando ${job.logInfo}`);
+        job.retryCount = 1;
+        messageQueue.push(job);
+      } else {
+        console.log(`[FILA] ❌ Job descartado: ${job.logInfo}`);
+      }
+    } finally {
+      try { await client.stopTyping(job.to); } catch {}
+      await delay(1000);
     }
-
-    queueIsRunning = false;
-    console.log('[FILA] Fila vazia. Processador em modo de espera.');
+  }
+  queueIsRunning = false;
+  console.log('[FILA] Fila concluída.');
 }
-// ========================================================================================
 
+// --------------------------------------------------------------------
+// INÍCIO DO SISTEMA
+// --------------------------------------------------------------------
 async function iniciar() {
   let client;
   try {
@@ -101,15 +117,20 @@ async function iniciar() {
       tokenStore: 'file',
       autoClose: 0,
       headless: true,
-      puppeteerOptions: { headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-accelerated-2d-canvas', '--no-first-run', '--no-zygote', '--disable-gpu'], },
+      puppeteerOptions: {
+        headless: true,
+        args: [
+          '--no-sandbox', '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage', '--disable-accelerated-2d-canvas',
+          '--no-first-run', '--no-zygote', '--disable-gpu'
+        ]
+      },
       catchQR: (base64Qr, asciiQR) => {
-        console.log('\n\n--- INSTRUÇÕES DE LOGIN ---\n');
-        console.log('Opção 1 (TENTATIVA): Escaneie o código ASCII abaixo.\n');
-        console.log(asciiQR);
-        console.log('\n---');
-        console.log('Opção 2 (GARANTIDO): Se o código acima falhar, copie o texto BASE64 abaixo no seu navegador para gerar a imagem do QR Code.\n');
-        console.log('BASE64:', base64Qr);
-        console.log('\n---------------------------\n');
+        console.log('
+QR Code para login (ASCII):
+', asciiQR);
+        console.log('Ou use o base64:
+', base64Qr);
       },
     });
 
@@ -117,33 +138,29 @@ async function iniciar() {
 
     client.onMessage(async (msg) => {
       if (!msg.from || !msg.body) return;
-      const txt = msg.body.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
-      
+      const txt = msg.body.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
       if (RESPOSTAS_OK.some(pat => txt.includes(pat))) {
-        console.log(`\n[CLIENTE] ${msg.from} pediu o cupom. Adicionando à FRENTE da fila...`);
+        console.log(`
+[CLIENTE] ${msg.from} pediu o cupom.`);
         const contatoInfo = await client.getContact(msg.from);
         const primeiroNome = contatoInfo.pushname ? contatoInfo.pushname.split(' ')[0] : 'Cliente';
         const numeroCupom = rnd(35, 48);
-        const respostaCupom = TEMPLATES_RESPOSTA[rnd(0, TEMPLATES_RESPOSTA.length - 1)].replace('{primeiro}', primeiroNome).replace('{contador}', numeroCupom);
-        
-        messageQueue.unshift({ type: 'file', to: msg.from, path: VIDEO_PATH, filename: 'cupom.mp4', caption: '🎁 Aproveite essa surpresa da Via Búzios com carinho!', humanDelay: rnd(VIDEO_DELAY_MIN, VIDEO_DELAY_MAX), logInfo: `resposta de vídeo para ${primeiroNome}`, isMassMessage: false });
-        messageQueue.unshift({ type: 'text', to: msg.from, content: respostaCupom, humanDelay: rnd(RESPOSTA_DELAY_MIN, RESPOSTA_DELAY_MAX), logInfo: `resposta de texto para ${primeiroNome}`, isMassMessage: false });
-        
+        const respostaCupom = TEMPLATES_RESPOSTA[rnd(0, TEMPLATES_RESPOSTA.length - 1)]
+          .replace('{primeiro}', primeiroNome).replace('{contador}', numeroCupom);
+        messageQueue.unshift({ type: 'file', to: msg.from, path: VIDEO_PATH, filename: 'cupom.mp4', caption: '🎁 Aproveite essa surpresa da Via Búzios com carinho!', humanDelay: rnd(VIDEO_DELAY_MIN, VIDEO_DELAY_MAX), logInfo: `resposta vídeo ${primeiroNome}`, isMassMessage: false });
+        messageQueue.unshift({ type: 'text', to: msg.from, content: respostaCupom, humanDelay: rnd(RESPOSTA_DELAY_MIN, RESPOSTA_DELAY_MAX), logInfo: `resposta texto ${primeiroNome}`, isMassMessage: false });
         startQueueProcessor(client);
       }
     });
 
-    console.log('⏳ Sessão estabilizada. Populando a fila com disparos em massa...');
-    
+    console.log('⏳ Sessão estabilizada. Iniciando fila de disparo...');
     for (const c of contatos) {
-        const txt = TEMPLATES_INICIAIS[rnd(0, TEMPLATES_INICIAIS.length - 1)].replace('{primeiro}', c.primeiroNome);
-        messageQueue.push({ type: 'text', to: c.telefone, content: txt, humanDelay: rnd(INTERVALO_MIN, INTERVALO_MAX), logInfo: `disparo para ${c.nomeCompleto}`, isMassMessage: true });
+      const txt = TEMPLATES_INICIAIS[rnd(0, TEMPLATES_INICIAIS.length - 1)].replace('{primeiro}', c.primeiroNome);
+      messageQueue.push({ type: 'text', to: c.telefone, content: txt, humanDelay: rnd(INTERVALO_MIN, INTERVALO_MAX), logInfo: `disparo ${c.nomeCompleto}`, isMassMessage: true });
     }
-    console.log(`✅ ${contatos.length} contatos adicionados ao FIM da fila de disparo.`);
-    
+    console.log(`✅ ${contatos.length} contatos adicionados à fila.`);
     startQueueProcessor(client);
-
   } catch (err) {
-    console.error('💥 Erro crítico na inicialização do wppconnect:', err.message);
+    console.error('💥 Erro crítico na inicialização:', err.message);
   }
 }
