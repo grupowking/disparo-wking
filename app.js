@@ -1,6 +1,5 @@
 // ====================================================================
-//  Via Búzios – Disparo “Arquitetura de Fila Robusta (Final)”
-//  Solução definitiva para estabilidade em produção.
+//  Via Búzios – Disparo “Versão Final com Retentativa Robusta”
 // ====================================================================
 const wppconnect = require('@wppconnect-team/wppconnect');
 const fs         = require('fs');
@@ -15,6 +14,7 @@ const RESPOSTA_DELAY_MIN = 15_000;
 const RESPOSTA_DELAY_MAX = 30_000;
 const VIDEO_DELAY_MIN    = 10_000;
 const VIDEO_DELAY_MAX    = 20_000;
+const RETRY_DELAY        = 20_000; // Pausa de 20 segundos para retentativa
 
 const SESSAO       = 'VBConcept';
 const VIDEO_PATH   = './cupom.mp4';
@@ -33,26 +33,24 @@ function dentroDoHorario() { const d = new Date(); const dia = d.getDay(); const
 const contatos = [];
 fs.createReadStream('contatos.csv').pipe(csv({ separator: ';', mapHeaders: ({ header }) => header.trim() })).on('data', (row) => { const nomeRaw = row['nome'] || ''; const numeroRaw = row['numero'] || ''; if (!nomeRaw || !numeroRaw) return; const nomeLimpo = nomeRaw.trim(); const numLimpo = numeroRaw.toString().replace(/\D/g, ''); if (numLimpo.length < 10) return; contatos.push({ telefone : `55${numLimpo}@c.us`, nomeCompleto : nomeLimpo, primeiroNome : nomeLimpo.split(' ')[0], }); }).on('end', () => { console.log(`✅ CSV lido. ${contatos.length} contatos válidos.`); iniciar(); });
 
-// ======================= NOVO SISTEMA DE FILA ROBUSTO =======================
+// ======================= SISTEMA DE FILA ROBUSTO COM RETENTATIVA CONTIDA =======================
 const messageQueue = [];
 let queueIsRunning = false;
 
 async function startQueueProcessor(client) {
-    if (queueIsRunning) {
-        return; // O processador já está rodando.
-    }
+    if (queueIsRunning) return;
     queueIsRunning = true;
     console.log('[FILA] Iniciando o processador de fila...');
 
     while (messageQueue.length > 0) {
-        const job = messageQueue.shift(); // Pega o primeiro job
+        const job = messageQueue.shift();
 
         try {
             if (!dentroDoHorario() && job.isMassMessage) {
                 console.log(`[FILA] ⏰ Fora do horário para disparo em massa. Devolvendo job para o fim da fila.`);
                 messageQueue.push(job);
-                await delay(600_000); // Pausa de 10 minutos antes de checar o próximo.
-                continue; // Pula para a próxima iteração do loop.
+                await delay(600_000);
+                continue;
             }
 
             console.log(`\n[FILA] Processando job do tipo "${job.type}" para ${job.logInfo}...`);
@@ -69,22 +67,38 @@ async function startQueueProcessor(client) {
 
         } catch (e) {
             console.error(`[FILA] ❌ Job para ${job.logInfo} falhou: ${e.message}`);
-            if (e.message && e.message.includes('Chat not found') && !job.retryCount) {
-                job.retryCount = 1;
-                console.log(`[FILA] 🟡 Reagendando job para ${job.logInfo} com prioridade.`);
-                messageQueue.unshift(job); // Adiciona de volta no INÍCIO da fila para retentativa.
+            
+            // LÓGICA DE RETENTATIVA CONTIDA
+            if (e.message && e.message.includes('Chat not found')) {
+                console.log(`[FILA] 🟡 Falha "Chat not found". Pausando ${RETRY_DELAY / 1000}s para retentativa...`);
+                await delay(RETRY_DELAY);
+
+                try {
+                    console.log(`[FILA] -> Retentativa para ${job.logInfo}...`);
+                    await client.startTyping(job.to);
+                    await delay(2000); // Pequeno delay para a retentativa
+
+                    if (job.type === 'text') {
+                        await client.sendText(job.to, job.content);
+                    } else if (job.type === 'file') {
+                        await client.sendFile(job.to, job.path, job.filename, job.caption);
+                    }
+                    console.log(`[FILA] ✅ SUCESSO na retentativa para ${job.logInfo}.`);
+
+                } catch (retryError) {
+                    console.error(`[FILA] ❌ Falha definitiva para ${job.logInfo} após retentativa: ${retryError.message}`);
+                }
             }
         } finally {
             try { await client.stopTyping(job.to); } catch (e) {}
-            // Pequena pausa entre cada job para evitar sobrecarga
-            await delay(1000); 
+            await delay(1000); // Pausa de 1s entre cada job para garantir estabilidade
         }
     }
 
     queueIsRunning = false;
     console.log('[FILA] Fila vazia. Processador em modo de espera.');
 }
-// ====================================================================
+// ========================================================================================
 
 async function iniciar() {
   let client;
@@ -122,7 +136,7 @@ async function iniciar() {
         messageQueue.unshift({ type: 'file', to: msg.from, path: VIDEO_PATH, filename: 'cupom.mp4', caption: '🎁 Aproveite essa surpresa da Via Búzios com carinho!', humanDelay: rnd(VIDEO_DELAY_MIN, VIDEO_DELAY_MAX), logInfo: `resposta de vídeo para ${primeiroNome}`, isMassMessage: false });
         messageQueue.unshift({ type: 'text', to: msg.from, content: respostaCupom, humanDelay: rnd(RESPOSTA_DELAY_MIN, RESPOSTA_DELAY_MAX), logInfo: `resposta de texto para ${primeiroNome}`, isMassMessage: false });
         
-        startQueueProcessor(client); // Inicia o processador se ele estiver parado.
+        startQueueProcessor(client);
       }
     });
 
@@ -134,7 +148,7 @@ async function iniciar() {
     }
     console.log(`✅ ${contatos.length} contatos adicionados ao FIM da fila de disparo.`);
     
-    startQueueProcessor(client); // Inicia o processador de fila pela primeira vez.
+    startQueueProcessor(client);
 
   } catch (err) {
     console.error('💥 Erro crítico na inicialização do wppconnect:', err.message);
