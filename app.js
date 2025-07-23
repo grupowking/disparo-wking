@@ -1,13 +1,13 @@
 // ====================================================================
-//  Via Búzios – Disparo “O Estabilizador”
+//  Via Búzios – Disparo “O Paciente Estrategista”
 // ====================================================================
 const wppconnect = require('@wppconnect-team/wppconnect');
 const fs         = require('fs');
 const csv        = require('csv-parser');
 
 // --- CONFIGURAÇÕES ---
-const INTERVALO_MIN = 70_000;
-const INTERVALO_MAX = 140_000;
+const INTERVALO_MIN = 80_000;
+const INTERVALO_MAX = 150_000;
 const RESPOSTA_DELAY_MIN = 15_000;
 const RESPOSTA_DELAY_MAX = 30_000;
 const VIDEO_DELAY_MIN    = 10_000;
@@ -16,7 +16,6 @@ const SESSAO       = 'VBConcept';
 const VIDEO_PATH   = './cupom.mp4';
 
 // --- CONFIGURAÇÕES DE ROBUSTEZ ---
-const STABILIZATION_DELAY = 45_000; // 45 segundos para a sessão estabilizar após a conexão
 const RETRY_DELAY = 25_000;         // 25 segundos de espera antes de uma retentativa
 const MAX_RETRIES = 2;              // Tenta o envio original + 2 retentativas
 
@@ -49,7 +48,7 @@ async function startQueueProcessor(client) {
                 continue;
             }
 
-            console.log(`\n[FILA] Processando job para ${job.logInfo}...`);
+            console.log(`\n[FILA] Processando job para ${job.logInfo} (Tentativa ${job.retryCount + 1})...`);
             await client.startTyping(job.to);
             await delay(job.humanDelay);
 
@@ -62,19 +61,18 @@ async function startQueueProcessor(client) {
         } catch (e) {
             console.error(`[FILA] ❌ Falha ao processar ${job.logInfo}: ${e.message}`);
             
-            job.retryCount = (job.retryCount || 0) + 1;
-            const isChatNotFound = e.message && e.message.includes('Chat not found');
+            job.retryCount++;
 
-            if (isChatNotFound && job.retryCount <= MAX_RETRIES) {
+            if (e.message.includes('Chat not found') && job.retryCount <= MAX_RETRIES) {
                 console.log(`[FILA] 🟡 "Chat not found" (Tentativa ${job.retryCount}/${MAX_RETRIES}). Reenfileirando na FRENTE após pausa de ${RETRY_DELAY / 1000}s.`);
-                messageQueue.unshift(job); // Coloca de volta no início
-                await delay(RETRY_DELAY); // Espera antes de tentar de novo
+                messageQueue.unshift(job);
+                await delay(RETRY_DELAY);
             } else {
                 console.log(`[FILA] ❌ Falha definitiva para ${job.logInfo}. Job descartado.`);
             }
         } finally {
             try { await client.stopTyping(job.to); } catch {}
-            await delay(1000); // Pequena pausa entre jobs
+            await delay(1000);
         }
     }
     queueIsRunning = false;
@@ -100,9 +98,18 @@ async function iniciar() {
             },
         });
 
-        console.log('🔌 Conectado! A sessão agora vai estabilizar por 45 segundos...');
-        await delay(STABILIZATION_DELAY);
-        console.log('✅ Sessão estabilizada. O bot está pronto.');
+        // A MUDANÇA CRÍTICA ESTÁ AQUI
+        console.log('🔌 Conectado! Aguardando o sinal verde (estabilização completa) da sessão...');
+        await new Promise(resolve => {
+            client.onStateChange((state) => {
+                console.log(`[SISTEMA] Mudança de estado: ${state}`);
+                // Espera o estado 'CONNECTED', que significa que a sincronização terminou.
+                if (state === 'CONNECTED') {
+                    resolve();
+                }
+            });
+        });
+        console.log('✅ SINAL VERDE! A sessão está 100% estável. Iniciando processador de fila.');
 
         client.onMessage(async (msg) => {
             if (!msg.from || !msg.body) return;
@@ -114,8 +121,8 @@ async function iniciar() {
                 const numeroCupom = rnd(35, 48);
                 const respostaCupom = TEMPLATES_RESPOSTA[rnd(0, TEMPLATES_RESPOSTA.length - 1)].replace('{primeiro}', primeiroNome).replace('{contador}', numeroCupom);
                 
-                messageQueue.unshift({ type: 'file', to: msg.from, path: VIDEO_PATH, filename: 'cupom.mp4', caption: '🎁 Aproveite!', humanDelay: rnd(VIDEO_DELAY_MIN, VIDEO_DELAY_MAX), logInfo: `resposta de vídeo para ${primeiroNome}`, isMassMessage: false });
-                messageQueue.unshift({ type: 'text', to: msg.from, content: respostaCupom, humanDelay: rnd(RESPOSTA_DELAY_MIN, RESPOSTA_DELAY_MAX), logInfo: `resposta de texto para ${primeiroNome}`, isMassMessage: false });
+                messageQueue.unshift({ type: 'file', to: msg.from, path: VIDEO_PATH, filename: 'cupom.mp4', caption: '🎁 Aproveite!', humanDelay: rnd(VIDEO_DELAY_MIN, VIDEO_DELAY_MAX), logInfo: `resposta de vídeo para ${primeiroNome}`, isMassMessage: false, retryCount: 0 });
+                messageQueue.unshift({ type: 'text', to: msg.from, content: respostaCupom, humanDelay: rnd(RESPOSTA_DELAY_MIN, RESPOSTA_DELAY_MAX), logInfo: `resposta de texto para ${primeiroNome}`, isMassMessage: false, retryCount: 0 });
                 
                 startQueueProcessor(client);
             }
@@ -147,6 +154,7 @@ fs.createReadStream('contatos.csv')
         humanDelay: rnd(INTERVALO_MIN, INTERVALO_MAX),
         logInfo: `disparo para ${nomeLimpo}`,
         isMassMessage: true,
+        retryCount: 0, // Inicializa o contador de retentativas
     });
   })
   .on('end', () => {

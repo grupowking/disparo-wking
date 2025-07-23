@@ -1,14 +1,37 @@
-2025/07/23-11:42:06.797 202c Reusing MANIFEST C:\Users\Via\Documents\GitHub\disparo-wking\tokens\VBConcept\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
-2025/07/23-11:42:06.798 202c Recovering log #106
-2025/07/23-11:42:06.847 202c Reusing old log C:\Users\Via\Documents\GitHub\disparo-wking\tokens\VBConcept\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/000106.log 
-2025/07/23-11:42:07.902 8bc Level-0 table #111: started
-2025/07/23-11:42:07.958 8bc Level-0 table #111: 612357 bytes OK
-2025/07/23-11:42:07.969 8bc Delete type=0 #106
-2025/07/23-11:42:07.971 19e4 Manual compaction at level-0 from '\x00)\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00*\x00\x00\x00' @ 0 : 0; will stop at (end)
-2025/07/23-11:42:11.544 19e4 Compacting 1@1 + 1@2 files
-2025/07/23-11:42:12.559 19e4 Generated table #112@1: 54366 keys, 2219419 bytes
-2025/07/23-11:42:12.585 19e4 Generated table #113@1: 2726 keys, 54168 bytes
-2025/07/23-11:42:12.585 19e4 Compacted 1@1 + 1@2 files => 2273587 bytes
-2025/07/23-11:42:12.591 19e4 compacted to: files[ 0 0 2 0 0 0 0 ]
-2025/07/23-11:42:12.595 19e4 Delete type=2 #108
-2025/07/23-11:42:12.596 19e4 Delete type=2 #111
+2025/07/23-12:01:30.656 31c8 Reusing MANIFEST C:\Users\Via\Documents\GitHub\disparo-wking\tokens\VBConcept\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
+2025/07/23-12:01:30.657 31c8 Recovering log #110
+2025/07/23-12:01:30.677 31c8 Reusing old log C:\Users\Via\Documents\GitHub\disparo-wking\tokens\VBConcept\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/000110.log 
+2025/07/23-12:01:31.713 3328 Level-0 table #116: started
+2025/07/23-12:01:31.744 3328 Level-0 table #116: 389688 bytes OK
+2025/07/23-12:01:31.746 3328 Delete type=0 #110
+2025/07/23-12:01:31.747 31c8 Manual compaction at level-0 from '\x00*\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00+\x00\x00\x00' @ 0 : 0; will stop at (end)
+2025/07/23-12:01:34.026 834 Compacting 1@1 + 2@2 files
+2025/07/23-12:01:34.225 834 Generated table #117@1: 53224 keys, 2218085 bytes
+2025/07/23-12:01:34.243 834 Generated table #118@1: 5555 keys, 111240 bytes
+2025/07/23-12:01:34.244 834 Compacted 1@1 + 2@2 files => 2329325 bytes
+2025/07/23-12:01:34.244 834 compacted to: files[ 0 0 2 0 0 0 0 ]
+2025/07/23-12:01:34.245 834 Delete type=2 #112
+2025/07/23-12:01:34.245 834 Delete type=2 #113
+2025/07/23-12:01:34.245 834 Delete type=2 #116
+2025/07/23-12:16:35.633 3328 Level-0 table #120: started
+2025/07/23-12:16:36.013 3328 Level-0 table #120: 1184172 bytes OK
+2025/07/23-12:16:36.016 3328 Delete type=0 #115
+2025/07/23-12:16:50.778 834 Compacting 1@1 + 2@2 files
+2025/07/23-12:16:50.956 834 Generated table #121@1: 54738 keys, 2222684 bytes
+2025/07/23-12:16:50.983 834 Generated table #122@1: 9467 keys, 325181 bytes
+2025/07/23-12:16:50.983 834 Compacted 1@1 + 2@2 files => 2547865 bytes
+2025/07/23-12:16:50.984 834 compacted to: files[ 0 0 2 0 0 0 0 ]
+2025/07/23-12:16:50.985 834 Delete type=2 #117
+2025/07/23-12:16:50.985 834 Delete type=2 #118
+2025/07/23-12:16:50.985 834 Delete type=2 #120
+2025/07/23-12:44:05.002 834 Level-0 table #124: started
+2025/07/23-12:44:05.075 834 Level-0 table #124: 1339609 bytes OK
+2025/07/23-12:44:05.078 834 Delete type=0 #119
+2025/07/23-12:44:11.847 834 Compacting 1@1 + 2@2 files
+2025/07/23-12:44:11.996 834 Generated table #125@1: 52887 keys, 2221562 bytes
+2025/07/23-12:44:12.037 834 Generated table #126@1: 16675 keys, 553589 bytes
+2025/07/23-12:44:12.037 834 Compacted 1@1 + 2@2 files => 2775151 bytes
+2025/07/23-12:44:12.038 834 compacted to: files[ 0 0 2 0 0 0 0 ]
+2025/07/23-12:44:12.039 834 Delete type=2 #121
+2025/07/23-12:44:12.039 834 Delete type=2 #122
+2025/07/23-12:44:12.039 834 Delete type=2 #124
