@@ -1,15 +1,14 @@
-2025/07/18-17:54:43.052 4f0 Reusing MANIFEST C:\Users\Via\Documents\GitHub\disparo-wking\tokens\VBConcept\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
-2025/07/18-17:54:43.052 4f0 Recovering log #137
-2025/07/18-17:54:43.119 4f0 Reusing old log C:\Users\Via\Documents\GitHub\disparo-wking\tokens\VBConcept\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/000137.log 
-2025/07/18-17:54:43.120 4f0 Delete type=2 #136
-2025/07/18-17:54:43.120 4f0 Delete type=2 #138
-2025/07/18-17:54:44.114 2a1c Level-0 table #142: started
-2025/07/18-17:54:44.166 2a1c Level-0 table #142: 673072 bytes OK
-2025/07/18-17:54:44.169 2a1c Delete type=0 #137
-2025/07/18-17:54:44.170 1a84 Manual compaction at level-0 from '\x00:\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00;\x00\x00\x00' @ 0 : 0; will stop at (end)
-2025/07/18-17:54:46.884 4f0 Compacting 1@1 + 1@2 files
-2025/07/18-17:54:47.057 4f0 Generated table #143@1: 21968 keys, 916527 bytes
-2025/07/18-17:54:47.058 4f0 Compacted 1@1 + 1@2 files => 916527 bytes
-2025/07/18-17:54:47.061 4f0 compacted to: files[ 0 0 1 0 0 0 0 ]
-2025/07/18-17:54:47.062 4f0 Delete type=2 #139
-2025/07/18-17:54:47.062 4f0 Delete type=2 #142
+2025/07/23-11:42:06.797 202c Reusing MANIFEST C:\Users\Via\Documents\GitHub\disparo-wking\tokens\VBConcept\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
+2025/07/23-11:42:06.798 202c Recovering log #106
+2025/07/23-11:42:06.847 202c Reusing old log C:\Users\Via\Documents\GitHub\disparo-wking\tokens\VBConcept\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/000106.log 
+2025/07/23-11:42:07.902 8bc Level-0 table #111: started
+2025/07/23-11:42:07.958 8bc Level-0 table #111: 612357 bytes OK
+2025/07/23-11:42:07.969 8bc Delete type=0 #106
+2025/07/23-11:42:07.971 19e4 Manual compaction at level-0 from '\x00)\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00*\x00\x00\x00' @ 0 : 0; will stop at (end)
+2025/07/23-11:42:11.544 19e4 Compacting 1@1 + 1@2 files
+2025/07/23-11:42:12.559 19e4 Generated table #112@1: 54366 keys, 2219419 bytes
+2025/07/23-11:42:12.585 19e4 Generated table #113@1: 2726 keys, 54168 bytes
+2025/07/23-11:42:12.585 19e4 Compacted 1@1 + 1@2 files => 2273587 bytes
+2025/07/23-11:42:12.591 19e4 compacted to: files[ 0 0 2 0 0 0 0 ]
+2025/07/23-11:42:12.595 19e4 Delete type=2 #108
+2025/07/23-11:42:12.596 19e4 Delete type=2 #111

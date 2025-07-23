@@ -1,3 +1,6 @@
-2025/07/18-18:29:54.970 d54 Reusing MANIFEST C:\Users\Via\Documents\GitHub\disparo-wking\tokens\VBConcept\Default\Local Storage\leveldb/MANIFEST-000001
-2025/07/18-18:29:56.003 d54 Recovering log #3
-2025/07/18-18:29:56.008 d54 Reusing old log C:\Users\Via\Documents\GitHub\disparo-wking\tokens\VBConcept\Default\Local Storage\leveldb/000003.log 
+2025/07/23-12:01:29.626 1204 Reusing MANIFEST C:\Users\Via\Documents\GitHub\disparo-wking\tokens\VBConcept\Default\Local Storage\leveldb/MANIFEST-000001
+2025/07/23-12:01:29.676 1204 Recovering log #7
+2025/07/23-12:01:29.810 1204 Reusing old log C:\Users\Via\Documents\GitHub\disparo-wking\tokens\VBConcept\Default\Local Storage\leveldb/000007.log 
+2025/07/23-12:43:29.940 2d1c Level-0 table #11: started
+2025/07/23-12:43:29.959 2d1c Level-0 table #11: 12989 bytes OK
+2025/07/23-12:43:29.961 2d1c Delete type=0 #7
