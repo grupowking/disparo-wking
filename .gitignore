@@ -1,9 +1,6 @@
 # Dependências do Node
 node_modules
 
-# Arquivos de sessão do WPPConnect
-tokens/
-
 # Arquivos de log e sistema
 *.log
 .env
