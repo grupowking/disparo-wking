@@ -147,4 +147,3 @@ async function iniciar() {
     console.error('💥 Erro crítico na inicialização do wppconnect:', err.message);
   }
 }
-```</immersive>
