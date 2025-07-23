@@ -1,35 +1,68 @@
 // ====================================================================
-//  Via Búzios – Disparo “Versão Final Otimizada (Com Fila de Prioridade)”
+//  Via Búzios – Disparo “Versão Definitiva e Completa”
+//  Arquitetura: Fila de Prioridade + Login Base64 para Servidor
 // ====================================================================
 const wppconnect = require('@wppconnect-team/wppconnect');
 const fs         = require('fs');
 const csv        = require('csv-parser');
 
-// ... (Todas as configurações, templates, etc. permanecem exatamente as mesmas) ...
+// --------------------------------------------------------------------
+// CONFIGURAÇÕES
+// --------------------------------------------------------------------
 const INTERVALO_MIN = 70_000;
 const INTERVALO_MAX = 140_000;
 const TYPING_MIN    = 3_000;
 const TYPING_MAX    = 6_000;
-const RESPOSTA_DELAY_MIN = 30_000;
-const RESPOSTA_DELAY_MAX = 45_000;
-const VIDEO_DELAY_MIN    = 15_000;
-const VIDEO_DELAY_MAX    = 30_000;
+
+const RESPOSTA_DELAY_MIN = 15_000; // Reduzido para uma resposta mais rápida
+const RESPOSTA_DELAY_MAX = 30_000;
+const VIDEO_DELAY_MIN    = 10_000;
+const VIDEO_DELAY_MAX    = 20_000;
+
 const SESSAO       = 'VBConcept';
 const VIDEO_PATH   = './cupom.mp4';
-const TEMPLATES_INICIAIS = [ `🎁 {primeiro}, adivinha? Liberamos um lote de 50 cupons com uma surpresa especial pra você aqui na Via Búzios 😍\n\nPreparada pros nossos clientes fiéis! Responde “quero meu presente” pra garantir o seu antes que acabe! 👀`, `🎉 Hey {primeiro}! Pintou um mimo exclusivo pra quem é VIP na Via Búzios, mas corre que é limitado! 🧡\n\nQuer descobrir o que é? Manda “quero meu presente” pra reservar o seu! 😉`, `🙌 {primeiro}! Surpresa chegando… Liberamos um lote único de 50 cupons só pra quem é da casa 😍\n\nDigita “quero meu presente” pra eu liberar o seu!`, `🥳 {primeiro}, preparamos algo que é a sua cara, mas são só 50 unidades!\n\nPra saber e garantir o seu, me responde “quero meu presente” e pronto 👀`, `👋 Oi, {primeiro}! Passando pra avisar que separamos um presente pra você, mas seja rápido(a), são só para os 50 primeiros! ✨\n\nCurioso(a)? Manda um “quero meu presente” aqui!`, `✨ {primeiro}, seu dia vai ficar melhor! Temos um benefício exclusivo te esperando na Via Búzios, mas o lote é limitado.\n\nÉ só responder “quero meu presente” que eu guardo um pra você!`, `Ei, {primeiro}! 🤫 Temos um segredinho que vale um presente... mas são apenas 50 cupons!\n\nSe quiser garantir o seu, já sabe, né? “quero meu presente” 👇`, `🧡 {primeiro}, seu nome foi selecionado para algo especial que preparamos na Via Búzios! Corra, pois a oferta é limitada aos 50 primeiros.\n\nNão fica de fora! Me manda “quero meu presente” pra desbloquear.`, `Sabe quem lembrou de você hoje, {primeiro}? A gente! E com um presente limitado. 🎁\n\nPra receber, é fácil: responde “quero meu presente” antes que esgote.`, `Olá {primeiro}! Que tal uma surpresa pra alegrar sua semana? A Via Búzios preparou uma, mas são só 50 cupons! 💖\n\nBasta responder “quero meu presente” pra descobrir e garantir o seu!` ];
-const TEMPLATES_RESPOSTA = [ `Ufa, na hora! Você garantiu o cupom de número {contador} de 50! 🥳\n\nVocê desbloqueou 15% OFF pra usar nas lojas Via Búzios até 15/08. Corre pra usar antes que os outros resgatem tudo!\n\nÉ só mostrar esse cupom no caixa, combinado? 🧡`, `Show, {primeiro}! Você é o cliente Nº {contador} a garantir o seu. Restam poucos! Aqui está sua surpresa: 15% DE DESCONTO 🥳\n\nVálido em qualquer loja Via Búzios até 15/08. Apresente este cupom e aproveite!`, `Conseguimos! ✨ Seu cupom é o de número {contador} e foi ativado. Se eu fosse você, já corria pra loja!\n\nUse e abuse nas lojas Via Búzios até o dia 15/08. Boas compras!`, `Missão cumprida, {primeiro}! 🎁 Você garantiu o cupom de número {contador}. Agora é correr!\n\nEle é válido até 15/08 em todas as nossas lojas. É só mostrar no caixa!` ];
-const RESPOSTAS_OK = [ 'quero meu presente', 'quero o presente', 'quero a surpresa', 'quero minha surpresa', 'quero surpresa', 'meu presente', 'cade meu presente', 'kd meu presente', 'me da o presente', 'manda o presente', 'manda a surpresa' ];
+
+const TEMPLATES_INICIAIS = [
+  `🎁 {primeiro}, adivinha? Liberamos um lote de 50 cupons com uma surpresa especial pra você aqui na Via Búzios 😍\n\nPreparada pros nossos clientes fiéis! Responde “quero meu presente” pra garantir o seu antes que acabe! 👀`,
+  `🎉 Hey {primeiro}! Pintou um mimo exclusivo pra quem é VIP na Via Búzios, mas corre que é limitado! 🧡\n\nQuer descobrir o que é? Manda “quero meu presente” pra reservar o seu! 😉`,
+  `🙌 {primeiro}! Surpresa chegando… Liberamos um lote único de 50 cupons só pra quem é da casa 😍\n\nDigita “quero meu presente” pra eu liberar o seu!`,
+  `🥳 {primeiro}, preparamos algo que é a sua cara, mas são só 50 unidades!\n\nPra saber e garantir o seu, me responde “quero meu presente” e pronto 👀`,
+  `👋 Oi, {primeiro}! Passando pra avisar que separamos um presente pra você, mas seja rápido(a), são só para os 50 primeiros! ✨\n\nCurioso(a)? Manda um “quero meu presente” aqui!`,
+  `✨ {primeiro}, seu dia vai ficar melhor! Temos um benefício exclusivo te esperando na Via Búzios, mas o lote é limitado.\n\nÉ só responder “quero meu presente” que eu guardo um pra você!`,
+  `Ei, {primeiro}! 🤫 Temos um segredinho que vale um presente... mas são apenas 50 cupons!\n\nSe quiser garantir o seu, já sabe, né? “quero meu presente” 👇`,
+  `🧡 {primeiro}, seu nome foi selecionado para algo especial que preparamos na Via Búzios! Corra, pois a oferta é limitada aos 50 primeiros.\n\nNão fica de fora! Me manda “quero meu presente” pra desbloquear.`,
+  `Sabe quem lembrou de você hoje, {primeiro}? A gente! E com um presente limitado. 🎁\n\nPra receber, é fácil: responde “quero meu presente” antes que esgote.`,
+  `Olá {primeiro}! Que tal uma surpresa pra alegrar sua semana? A Via Búzios preparou uma, mas são só 50 cupons! 💖\n\nBasta responder “quero meu presente” pra descobrir e garantir o seu!`
+];
+
+const TEMPLATES_RESPOSTA = [
+    `Ufa, na hora! Você garantiu o cupom de número {contador} de 50! 🥳\n\nVocê desbloqueou 15% OFF pra usar nas lojas Via Búzios até 15/08. Corre pra usar antes que os outros resgatem tudo!\n\nÉ só mostrar esse cupom no caixa, combinado? 🧡`,
+    `Show, {primeiro}! Você é o cliente Nº {contador} a garantir o seu. Restam poucos! Aqui está sua surpresa: 15% DE DESCONTO 🥳\n\nVálido em qualquer loja Via Búzios até 15/08. Apresente este cupom e aproveite!`,
+    `Conseguimos! ✨ Seu cupom é o de número {contador} e foi ativado. Se eu fosse você, já corria pra loja!\n\nUse e abuse nas lojas Via Búzios até o dia 15/08. Boas compras!`,
+    `Missão cumprida, {primeiro}! 🎁 Você garantiu o cupom de número {contador}. Agora é correr!\n\nEle é válido até 15/08 em todas as nossas lojas. É só mostrar no caixa!`
+];
+
+const RESPOSTAS_OK = [
+  'quero meu presente', 'quero o presente', 'quero a surpresa',
+  'quero minha surpresa', 'quero surpresa', 'meu presente',
+  'cade meu presente', 'kd meu presente', 'me da o presente',
+  'manda o presente', 'manda a surpresa'
+];
+
+// --------------------------------------------------------------------
+// UTILITÁRIOS
+// --------------------------------------------------------------------
 const rnd = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 const delay = (ms) => new Promise(r => setTimeout(r, ms));
-// REMOVEMOS A VARIÁVEL 'intervalo' POIS AS PAUSAS AGORA SÃO CONTROLADAS PELA FILA
-
-// ... (O resto das funções utilitárias e a leitura do CSV permanecem iguais) ...
 function dentroDoHorario() { const d = new Date(); const dia = d.getDay(); const h = d.getHours(); if (dia === 0) return h >= 9 && h < 14; if (dia >= 1 && dia <= 6) return h >= 9 && h < 20; return false; }
+
+// --------------------------------------------------------------------
+// LEITURA DO CSV
+// --------------------------------------------------------------------
 const contatos = [];
 fs.createReadStream('contatos.csv').pipe(csv({ separator: ';', mapHeaders: ({ header }) => header.trim() })).on('data', (row) => { const nomeRaw = row['nome'] || ''; const numeroRaw = row['numero'] || ''; if (!nomeRaw || !numeroRaw) return; const nomeLimpo = nomeRaw.trim(); const numLimpo = numeroRaw.toString().replace(/\D/g, ''); if (numLimpo.length < 10) return; contatos.push({ telefone : `55${numLimpo}@c.us`, nomeCompleto : nomeLimpo, primeiroNome : nomeLimpo.split(' ')[0], }); }).on('end', () => { console.log(`✅ CSV lido. ${contatos.length} contatos válidos.`); iniciar(); });
 
-
-// ======================= SISTEMA DE FILA OTIMIZADO =======================
+// ======================= SISTEMA DE FILA DE MENSAGENS =======================
 const messageQueue = [];
 let isSending = false;
 
@@ -41,9 +74,18 @@ async function processQueue(client) {
     const job = messageQueue.shift();
 
     try {
+        if (!dentroDoHorario() && job.isMassMessage) {
+            console.log(`[FILA] ⏰ Fora do horário para disparo em massa. Adicionando job de volta ao fim da fila.`);
+            messageQueue.push(job); // Devolve ao fim da fila
+            await delay(600_000); // Espera 10 minutos antes de checar de novo
+            isSending = false;
+            process.nextTick(() => processQueue(client));
+            return;
+        }
+
         console.log(`\n[FILA] Processando job do tipo "${job.type}" para ${job.logInfo}...`);
         
-        const initialDelay = job.humanDelay || rnd(TYPING_MIN, TYPING_MAX);
+        const initialDelay = job.humanDelay;
         console.log(`[FILA] Aguardando ${initialDelay / 1000}s (simulação humana)...`);
         await client.startTyping(job.to);
         await delay(initialDelay);
@@ -68,7 +110,6 @@ async function processQueue(client) {
         process.nextTick(() => processQueue(client));
     }
 }
-
 // ====================================================================
 
 async function iniciar() {
@@ -79,8 +120,25 @@ async function iniciar() {
       tokenStore: 'file',
       autoClose: 0,
       headless: true,
-      puppeteerOptions: { headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-accelerated-2d-canvas', '--no-first-run', '--no-zygote', '--disable-gpu'], },
-      catchQR: (base64Qr, asciiQR) => { console.log(asciiQR); },
+      puppeteerOptions: {
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-accelerated-2d-canvas', '--no-first-run', '--no-zygote', '--disable-gpu'],
+      },
+      catchQR: (base64Qr, asciiQR) => {
+        console.log('\n\n--------------------------------------------------------------------------------');
+        console.log('ATENÇÃO: É NECESSÁRIO ESCANEAR O QR CODE PARA INICIAR A SESSÃO');
+        console.log('--------------------------------------------------------------------------------\n');
+        console.log('Opção 1 (TENTATIVA): Tente escanear o código ASCII abaixo. Diminua o zoom do navegador se necessário.');
+        console.log(asciiQR);
+        console.log('\n--------------------------------------------------------------------------------');
+        console.log('Opção 2 (GARANTIDO): Se o código acima não funcionar, siga os passos:');
+        console.log('1. Copie TODO o texto que começa com "data:image/png;base64," na linha abaixo.');
+        console.log('2. Cole o texto copiado na barra de endereço do seu navegador e aperte Enter.');
+        console.log('3. Uma imagem perfeita do QR Code irá aparecer. Escaneie-a com seu celular.');
+        console.log('\nQR CODE EM BASE64 (copie tudo, incluindo o início "data:image/png;base64,"): \n');
+        console.log(base64Qr);
+        console.log('\n--------------------------------------------------------------------------------');
+      },
     });
 
     console.log('🔌 Conectado. Escutando mensagens e pronto para processar a fila.');
@@ -98,8 +156,6 @@ async function iniciar() {
                                   .replace('{primeiro}', primeiroNome)
                                   .replace('{contador}', numeroCupom);
         
-        // ======================= OTIMIZAÇÃO DE PRIORIDADE =======================
-        // Adiciona o job de vídeo PRIMEIRO, usando unshift, para que ele fique atrás do de texto.
         messageQueue.unshift({
             type: 'file',
             to: msg.from,
@@ -108,17 +164,17 @@ async function iniciar() {
             caption: '🎁 Aproveite essa surpresa da Via Búzios com carinho!',
             humanDelay: rnd(VIDEO_DELAY_MIN, VIDEO_DELAY_MAX),
             logInfo: `resposta de vídeo para ${primeiroNome}`,
+            isMassMessage: false // Marcar como não sendo de massa
         });
 
-        // Adiciona o job de texto por último, usando unshift, para que ele seja o PRIMEIRO da fila.
         messageQueue.unshift({
             type: 'text',
             to: msg.from,
             content: respostaCupom,
             humanDelay: rnd(RESPOSTA_DELAY_MIN, RESPOSTA_DELAY_MAX),
             logInfo: `resposta de texto para ${primeiroNome}`,
+            isMassMessage: false // Marcar como não sendo de massa
         });
-        // =====================================================================
 
         processQueue(client);
       }
@@ -126,25 +182,22 @@ async function iniciar() {
 
     console.log('⏳ Sessão estabilizada. Populando a fila com disparos em massa...');
     
-    // Agora, em vez de um loop com delays, criamos todos os jobs e os adicionamos na fila.
-    // A própria fila controlará o tempo entre os envios.
     for (const c of contatos) {
         const txt = TEMPLATES_INICIAIS[rnd(0, TEMPLATES_INICIAIS.length - 1)].replace('{primeiro}', c.primeiroNome);
-        messageQueue.push({ // Disparos em massa entram no FIM da fila.
+        messageQueue.push({
             type: 'text',
             to: c.telefone,
             content: txt,
-            humanDelay: rnd(INTERVALO_MIN, INTERVALO_MAX), // O intervalo agora é um delay dentro do job
-            logInfo: `disparo para ${c.nomeCompleto}`
+            humanDelay: rnd(INTERVALO_MIN, INTERVALO_MAX),
+            logInfo: `disparo para ${c.nomeCompleto}`,
+            isMassMessage: true // Marcar como sendo de massa
         });
     }
     console.log(`✅ ${contatos.length} contatos adicionados ao FIM da fila de disparo.`);
     
-    // Inicia o processador da fila pela primeira vez.
     processQueue(client);
 
   } catch (err) {
     console.error('💥 Erro crítico na inicialização do wppconnect:', err.message);
   }
 }
-
