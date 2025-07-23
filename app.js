@@ -1,5 +1,5 @@
 // ====================================================================
-//  Via Búzios – Disparo “Versão Final com Retentativa Robusta”
+//  Via Búzios – Disparo “Final com Retentativa Inteligente”
 // ====================================================================
 const wppconnect = require('@wppconnect-team/wppconnect');
 const fs         = require('fs');
@@ -33,7 +33,7 @@ function dentroDoHorario() { const d = new Date(); const dia = d.getDay(); const
 const contatos = [];
 fs.createReadStream('contatos.csv').pipe(csv({ separator: ';', mapHeaders: ({ header }) => header.trim() })).on('data', (row) => { const nomeRaw = row['nome'] || ''; const numeroRaw = row['numero'] || ''; if (!nomeRaw || !numeroRaw) return; const nomeLimpo = nomeRaw.trim(); const numLimpo = numeroRaw.toString().replace(/\D/g, ''); if (numLimpo.length < 10) return; contatos.push({ telefone : `55${numLimpo}@c.us`, nomeCompleto : nomeLimpo, primeiroNome : nomeLimpo.split(' ')[0], }); }).on('end', () => { console.log(`✅ CSV lido. ${contatos.length} contatos válidos.`); iniciar(); });
 
-// ======================= SISTEMA DE FILA ROBUSTO COM RETENTATIVA CONTIDA =======================
+// ======================= SISTEMA DE FILA COM RETENTATIVA INTELIGENTE =======================
 const messageQueue = [];
 let queueIsRunning = false;
 
@@ -68,15 +68,22 @@ async function startQueueProcessor(client) {
         } catch (e) {
             console.error(`[FILA] ❌ Job para ${job.logInfo} falhou: ${e.message}`);
             
-            // LÓGICA DE RETENTATIVA CONTIDA
+            // ======================= NOVA LÓGICA DE RETENTATIVA INTELIGENTE =======================
             if (e.message && e.message.includes('Chat not found')) {
-                console.log(`[FILA] 🟡 Falha "Chat not found". Pausando ${RETRY_DELAY / 1000}s para retentativa...`);
-                await delay(RETRY_DELAY);
-
+                console.log(`[FILA] 🟡 Falha "Chat not found". Verificando número e pausando ${RETRY_DELAY / 1000}s...`);
+                
                 try {
+                    // 1. Força a verificação do número, o que ajuda a "encontrar" o chat.
+                    await client.checkNumberStatus(job.to);
+                    console.log(`[FILA] -> Verificação de número para ${job.logInfo} concluída.`);
+                    
+                    // 2. Pausa para dar tempo para a sincronização.
+                    await delay(RETRY_DELAY);
+
+                    // 3. Tenta enviar novamente.
                     console.log(`[FILA] -> Retentativa para ${job.logInfo}...`);
                     await client.startTyping(job.to);
-                    await delay(2000); // Pequeno delay para a retentativa
+                    await delay(2000);
 
                     if (job.type === 'text') {
                         await client.sendText(job.to, job.content);
@@ -89,9 +96,10 @@ async function startQueueProcessor(client) {
                     console.error(`[FILA] ❌ Falha definitiva para ${job.logInfo} após retentativa: ${retryError.message}`);
                 }
             }
+            // =====================================================================================
         } finally {
             try { await client.stopTyping(job.to); } catch (e) {}
-            await delay(1000); // Pausa de 1s entre cada job para garantir estabilidade
+            await delay(1000);
         }
     }
 
